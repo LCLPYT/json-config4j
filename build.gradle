@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'gradle-build-utils' version '1.2.0'
+}
+
+Properties props = loadProperties.call('publish.properties') as Properties
+
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+
+group = project.maven_group
+version = gitVersion.call()
+archivesBaseName = project.archives_base_name
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.json:json:${project.json_version}"
+
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+java {
+    withSourcesJar()
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.archivesBaseName}" }
+    }
+}
