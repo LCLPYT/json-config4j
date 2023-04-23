@@ -1,4 +1,4 @@
-package work.lclpnet.config;
+package work.lclpnet.config.json;
 
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,7 @@ import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SimpleConfigSerializerTest {
+class FileConfigSerializerTest {
 
     private static final Logger logger = LoggerFactory.getLogger("test");
 
@@ -21,7 +21,7 @@ class SimpleConfigSerializerTest {
         Path file = Path.of("src", "test", "resources", "test.json");
         assertTrue(Files.isRegularFile(file));
 
-        var serializer = new SimpleConfigSerializer<>(logger, TestConfig.FACTORY);
+        var serializer = new FileConfigSerializer<>(TestConfig.FACTORY, logger);
 
         TestConfig config = serializer.loadConfig(file);
 
@@ -34,7 +34,7 @@ class SimpleConfigSerializerTest {
         Path file = Path.of("src", "test", "resources", "test_missing.json");
         assertTrue(Files.isRegularFile(file));
 
-        var serializer = new SimpleConfigSerializer<>(logger, TestConfig.FACTORY);
+        var serializer = new FileConfigSerializer<>(TestConfig.FACTORY, logger);
 
         TestConfig config = serializer.loadConfig(file);
 
@@ -47,7 +47,7 @@ class SimpleConfigSerializerTest {
         Path file = Files.createTempDirectory("jsoncfg").resolve("empty.json");
         assertFalse(Files.exists(file));
 
-        var serializer = new SimpleConfigSerializer<>(logger, TestConfig.FACTORY);
+        var serializer = new FileConfigSerializer<>(TestConfig.FACTORY, logger);
 
         TestConfig config = serializer.loadConfig(file);
 
@@ -61,7 +61,7 @@ class SimpleConfigSerializerTest {
 
     @Test
     void testSaveConfig() throws IOException {
-        var serializer = new SimpleConfigSerializer<>(logger, TestConfig.FACTORY);
+        var serializer = new FileConfigSerializer<>(TestConfig.FACTORY, logger);
 
         Path file = Files.createTempDirectory("jsoncfg").resolve("test.json");
         TestConfig config = TestConfig.FACTORY.createDefaultConfig();
@@ -80,47 +80,5 @@ class SimpleConfigSerializerTest {
 
         assertEquals(5, json.getInt("foo"));
         assertEquals("Hello World!", json.getString("bar"));
-    }
-
-    private static class TestConfig implements JsonConfig {
-
-        // declare config properties and define default values
-        private int foo = 5;
-        private String bar = "Hello World!";
-
-        // default and json constructor
-        public TestConfig() {}
-
-        public TestConfig(JSONObject json) {
-            if (json.has("foo")) {
-                this.foo = json.getInt("foo");
-            }
-
-            if (json.has("bar")) {
-                this.bar = json.getString("bar");
-            }
-        }
-
-        @Override
-        public JSONObject toJson() {
-            JSONObject json = new JSONObject();
-
-            json.put("foo", foo);
-            json.put("bar", bar);
-
-            return json;
-        }
-
-        public static final JsonConfigFactory<TestConfig> FACTORY = new JsonConfigFactory<>() {
-            @Override
-            public TestConfig createDefaultConfig() {
-                return new TestConfig();
-            }
-
-            @Override
-            public TestConfig createConfig(JSONObject json) {
-                return new TestConfig(json);
-            }
-        };
     }
 }

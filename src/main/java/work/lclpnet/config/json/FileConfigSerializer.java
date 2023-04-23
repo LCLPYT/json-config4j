@@ -1,4 +1,4 @@
-package work.lclpnet.config;
+package work.lclpnet.config.json;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -8,14 +8,24 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class SimpleConfigSerializer<T extends JsonConfig> implements ConfigSerializer<T> {
+/**
+ * A config serializer that reads from and writes to the default file system.
+ * @param <T> The config class.
+ */
+public class FileConfigSerializer<T extends JsonConfig> implements ConfigSerializer<T> {
 
-    private final Logger logger;
     private final JsonConfigFactory<T> factory;
+    private final Logger logger;
 
-    public SimpleConfigSerializer(Logger logger, JsonConfigFactory<T> factory) {
-        this.logger = logger;
+    /**
+     * Create a new FileConfigSerializer.
+     *
+     * @param factory A {@link JsonConfigFactory} that converts {@link JSONObject}s to configs and provides a default config.
+     * @param logger A logger for error logging.
+     */
+    public FileConfigSerializer(JsonConfigFactory<T> factory, Logger logger) {
         this.factory = factory;
+        this.logger = logger;
     }
 
     public T loadConfig(Path file) throws IOException {
@@ -25,6 +35,7 @@ public class SimpleConfigSerializer<T extends JsonConfig> implements ConfigSeria
             try {
                 saveConfig(conf, file);
             } catch (IOException e) {
+                // ignore the error but log the error
                 logger.error("Failed to save config", e);
             }
 
